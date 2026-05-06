@@ -1,21 +1,23 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from 'db';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
-    // Correctly pass the URL inside the datasources object
-    super({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL || "postgresql://root:password123@localhost:5432/lms_db?schema=public",
-        },
-      },
-    });
+    const connectionString =
+      process.env.DATABASE_URL ||
+      'postgresql://root:password123@localhost:5432/lms_db?schema=public';
+
+    const pool = new Pool({ connectionString });
+
+    const adapter = new PrismaPg(pool);
+
+    super({ adapter });
   }
 
   async onModuleInit() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await this.$connect();
   }
 }
