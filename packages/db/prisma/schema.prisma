@@ -1,13 +1,148 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// Phase 1: User & Institution Management
+// ==========================================
+
+model Institution {
+  id        String   @id @default(uuid())
+  name      String
+  users     User[]
+  courses   Course[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  role          Role          @default(STUDENT)
+  institutionId String
+  institution   Institution   @relation(fields: [institutionId], references: [id])
+  enrollments   Enrollment[]
+  payments      Payment[]
+  submissions   Submission[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+enum Role {
+  SUPER_ADMIN
+  INSTITUTION_ADMIN
+  INSTRUCTOR
+  STUDENT
+  PARENT
+}
+
+// ==========================================
+// Phase 2: Course Management & Assessments
+// ==========================================
+
+model Course {
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  institutionId String
+  institution   Institution   @relation(fields: [institutionId], references: [id])
+  modules       Module[]
+  enrollments   Enrollment[]
+  payments      Payment[]
+  assessments   Assessment[]
+  liveSessions  LiveSession[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Module {
+  id       String   @id @default(uuid())
+  title    String
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id])
+  lessons  Lesson[]
+}
+
+model Lesson {
+  id       String @id @default(uuid())
+  title    String
+  content  String // Stores TipTap HTML/JSON
+  videoUrl String? // MUX video URL
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id])
+}
+
+model Enrollment {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id])
+  enrolledAt DateTime @default(now())
+}
+
+// ==========================================
+// Phase 3 & 4: Assessments, Live & Payments
+// ==========================================
+
+model Assessment {
+  id        String       @id @default(uuid())
+  title     String
+  courseId  String
+  course    Course       @relation(fields: [courseId], references: [id])
+  questions Question[]
+  submissions Submission[]
+}
+
+model Question {
+  id           String     @id @default(uuid())
+  text         String
+  type         String     // MCQ, ESSAY, CODE
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+}
+
+model Submission {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  grade        Float?
+  submittedAt  DateTime   @default(now())
+}
+
+model Payment {
+  id       String   @id @default(uuid())
+  amount   Float
+  status   String   // PENDING, COMPLETED, FAILED
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model LiveSession {
+  id          String       @id @default(uuid())
+  title       String
+  roomId      String       // LiveKit WebRTC Room ID
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id])
+  attendances Attendance[]
+  scheduledFor DateTime
+}
+
+model Attendance {
+  id            String      @id @default(uuid())
+  userId        String
+  liveSessionId String
+  liveSession   LiveSession @relation(fields: [liveSessionId], references: [id])
+  joinedAt      DateTime    @default(now())
+  leftAt        DateTime?
 }
