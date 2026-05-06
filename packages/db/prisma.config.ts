@@ -6,7 +6,7 @@ import { join } from 'path';
 dotenv.config({ path: join(__dirname, '.env') });
 
 export default defineConfig({
-  migrate: {
+  datasource: {
     url: process.env.DATABASE_URL,
   },
 });
