@@ -16,6 +16,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { InstitutionsModule } from './institutions/institutions.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { InstitutionsModule } from './institutions/institutions.module';
       // Prevent the ResourceGuard from strictly requiring mapped resources
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
     }),
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [
