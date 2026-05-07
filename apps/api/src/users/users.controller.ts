@@ -7,13 +7,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles({ roles: ['ADMIN'] })
+  @Roles({ roles: ['realm:ADMIN'] })
   async create(@Body() body: { email: string; role: any; institutionId: string }) {
     return this.usersService.createUser(body);
   }
 
   @Get()
-  @Roles({ roles: ['ADMIN'] })
+  @Roles({ roles: ['realm:ADMIN'] })
   async findAll() {
     return this.usersService.getAllUsers();
   }
