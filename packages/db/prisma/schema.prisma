@@ -20,16 +20,17 @@ model Institution {
 }
 
 model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  role          Role          @default(STUDENT)
-  institutionId String
-  institution   Institution   @relation(fields: [institutionId], references: [id])
-  enrollments   Enrollment[]
-  payments      Payment[]
-  submissions   Submission[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id               String        @id @default(uuid())
+  email            String        @unique
+  role             Role          @default(STUDENT)
+  institutionId    String
+  institution      Institution   @relation(fields: [institutionId], references: [id])
+  enrollments      Enrollment[]
+  payments         Payment[]
+  submissions      Submission[]
+  instructedCourses Course[]     @relation("CourseInstructor") // <-- Add this line
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 enum Role {
@@ -48,6 +49,8 @@ model Course {
   id            String        @id @default(uuid())
   title         String
   description   String?
+  instructorId  String        // <-- Add this line
+  instructor    User          @relation("CourseInstructor", fields: [instructorId], references: [id]) // <-- Add this line
   institutionId String
   institution   Institution   @relation(fields: [institutionId], references: [id])
   modules       Module[]

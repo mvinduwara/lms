@@ -14,7 +14,7 @@ export class UsersService {
   async getAllUsers() {
     return this.prisma.user.findMany({
       include: {
-        institution: true, // Pulls the institution details alongside the user
+        institution: true, 
       },
     });
   }
